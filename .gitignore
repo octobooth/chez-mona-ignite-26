@@ -4,3 +4,4 @@ __pycache__/
 .venv/
 copilot-sdk/uv.lock
 launcher/data/
+.github/extensions/**/.source-write.lock

@@ -1,8 +1,10 @@
-# Chez Mona, Microsoft Ignite 2026
+# Octobooth diner
 
-Private booth repository for the Chez Mona labs.
+Five diner-themed Copilot experiences for hands-on attendees and staff-led demos, available as a project-owned native Copilot canvas. See [running the diner](.github/extensions/octobooth-diner/README.md) for station configuration, QR entry, provisioning, and scoped teardown.
 
-## Tasks
+This public repository is an independent copy of [madebygps/chez-mona-ignite-26](https://github.com/madebygps/chez-mona-ignite-26). Chez Mona's original launcher, SDK starter, assets, attribution, and bundled licenses remain in their existing locations.
+
+## Chez Mona launcher
 
 | I want to | Read |
 |---|---|
@@ -15,5 +17,6 @@ Private booth repository for the Chez Mona labs.
 
 | Path | Contents |
 |---|---|
+| [`.github/extensions/octobooth-diner/`](.github/extensions/octobooth-diner/) | Native diner canvas, shared five-dish catalog, and station lifecycle |
 | [`launcher/`](launcher/) | The app for the cooking stations and the fridge kiosks |
 | [`copilot-sdk/`](copilot-sdk/) | Microsoft Copilot SDK starter for the Fried Chicken lab. The launcher copies it for each guest. |
