@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Octobooth diner</title>
+  <link rel="stylesheet" href="/ui.css">
+  <script src="/jsQR.js" defer></script>
+  <script src="/ui.js" defer></script>
+</head>
+<body>
+  <div class="gingham" aria-hidden="true"></div>
+  <header>
+    <a class="wordmark" href="/" aria-label="Octobooth diner home"><img src="/mona.svg" alt="" width="68" height="68"><span>Octobooth<small>THE COPILOT DINER</small></span></a>
+    <span class="stamp">FRESH IDEAS<br>SERVED DAILY</span>
+  </header>
+  <main>
+    <section class="welcome">
+      <p class="eyebrow" id="event">WELCOME TO THE BOOTH</p>
+      <h1>A table for<br><em>your next idea.</em></h1>
+      <p class="lede">Five dishes. Plenty to discover.<br>Pull up a chair and make something with Copilot.</p>
+      <div class="paths" role="group" aria-label="Choose your experience">
+        <button id="attendee" aria-pressed="true">I'm here to try it</button>
+        <button id="staff" aria-pressed="false">I'm leading a demo</button>
+      </div>
+    </section>
+    <div id="notice" role="alert" hidden></div>
+    <section id="scan" hidden aria-labelledby="scan-title">
+      <h2 id="scan-title">Got your order ticket?</h2>
+      <p>Scan the QR code from the diner ticket, or choose your dish below.</p>
+      <button id="camera">Scan my ticket</button>
+      <video id="video" playsinline muted hidden></video>
+      <p id="camera-notice" role="status"></p>
+    </section>
+    <section id="menu-section" aria-labelledby="menu-title">
+      <div class="section-title"><h2 id="menu-title">On the menu</h2><span>GOOD CODE. GOOD COMPANY.</span></div>
+      <div id="menu"></div>
+    </section>
+    <section id="order" hidden aria-live="polite"></section>
+  </main>
+  <footer><span>Made for curious minds.</span><span>Inspired by Chez Mona <span aria-hidden="true">✦</span> Hosted by Octobooth</span></footer>
+</body>
+</html>

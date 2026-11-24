@@ -1,0 +1,104 @@
+{
+  "dishes": [
+    {
+      "id": "fusilli",
+      "name": "Copilot Fusion Fusilli",
+      "tag": "A little help from the whole kitchen",
+      "description": "Explore model routing, then build something with agents.",
+      "recipe": "fusion",
+      "attendee": [
+        "Open your fresh repository in Copilot. Start a new chat and select Copilot Fusion.",
+        "Ask: Explain single, cascade, and critique. When would each pattern help?",
+        "Ask Copilot to build a small diner menu with tests. Inspect the changes and the model-routing information together."
+      ],
+      "staff": [
+        "Show routing on a real codebase. Compare a small explanation, a bounded code change, and a design task.",
+        "For a blank-prompt demonstration, choose From scratch. Let the audience shape the prompt, then inspect the agent's work rather than treating generation as verification."
+      ],
+      "variants": [{"recipe": "fusion", "label": "Routing"}, {"recipe": "fusion-blank", "label": "From scratch"}],
+      "learn": "https://docs.github.com/en/copilot/concepts/models/copilot-fusion"
+    },
+    {
+      "id": "fried-chicken",
+      "name": "Microsoft Copilot SDK Fried Chicken",
+      "tag": "Your app. Your tools. One helpful agent.",
+      "description": "Give an agent application a custom tool of its own.",
+      "recipe": "sdk",
+      "attendee": [
+        "Open your fresh starter in VS Code and inspect main.py.",
+        "Ask Copilot: What does define_tool do, and how does create_session make get_menu available to the agent?",
+        "Add one menu item or extend the tool. If the station has the documented SDK prerequisites, run uv run main.py and inspect the tool call."
+      ],
+      "staff": [
+        "Trace the application, session, custom tool, and response. Distinguish application code from a prompt.",
+        "Demonstrate a bounded tool change. Discuss authentication and tool permissions before connecting a real external service."
+      ],
+      "variants": [],
+      "learn": "https://github.com/github/copilot-sdk"
+    },
+    {
+      "id": "soup",
+      "name": "Agentic Alphabet Soup",
+      "tag": "Two recipes for getting work done",
+      "description": "Agentic Workflows and coding agent, with their different triggers and outputs.",
+      "recipe": "soup",
+      "attendee": [
+        "Open .github/workflows/weekly-workshop-triage.md. Find the trigger, permissions, tools, and safe outputs.",
+        "Open the prepared issue and coding agent pull request. Trace the issue request through the agent's changes.",
+        "Compare the mechanisms: Agentic Workflows run repository automation from declared triggers; coding agent takes an assigned issue to a proposed pull request. Neither bypasses review."
+      ],
+      "staff": [
+        "Walk through the workflow source and its declared safe outputs, then the separate issue-to-PR path. The inherited workflow is a read-only example here; do not dispatch it against the shared source repository.",
+        "Show the coding agent's evidence and checks. Do not describe a scheduled workflow as the coding agent or put stacked-PR content in this dish."
+      ],
+      "variants": [],
+      "learn": "https://github.github.com/gh-aw/"
+    },
+    {
+      "id": "dip",
+      "name": "Autofix Artichoke Dip",
+      "tag": "Review, spot, fix, and taste again",
+      "description": "Code Review, CodeQL, Autofix, and AI-powered security remediation.",
+      "recipe": "dip",
+      "attendee": [
+        "Open the prepared Code Review repository. Read Copilot's review on a feature PR and explain one suggested change.",
+        "In the security repository, compare the TypeScript CodeQL findings with the PHP AI scanning findings.",
+        "Inspect an Autofix suggestion, review the proposed diff, and explain how you would verify the fix before merging."
+      ],
+      "staff": [
+        "Keep review, deterministic analysis, AI findings, and remediation distinct. Show the evidence behind each.",
+        "Choose Agent-driven remediation for the deeper exercise: trace an assigned security alert to the agent's completed fix PR, then inspect its checks."
+      ],
+      "variants": [{"recipe": "dip", "label": "Review & Autofix"}, {"recipe": "dip-agent", "label": "Agent-driven remediation"}],
+      "learn": "https://docs.github.com/en/code-security"
+    },
+    {
+      "id": "sandwich",
+      "name": "GitHub Delivery Club Sandwich",
+      "tag": "A satisfying stack of delivery basics",
+      "description": "Issue, branch, pull request, Actions checks, merge, and deploy.",
+      "recipe": "delivery",
+      "attendee": [
+        "Open your fresh bingo repository and deployed game. Create a small, specific issue describing a change.",
+        "Create a branch, implement the change, and open a PR linked to the issue. Inspect the diff and Actions checks.",
+        "Review and merge the PR. Follow the Pages deployment and verify the result in the game."
+      ],
+      "staff": [
+        "Trace the complete delivery loop, including the distinction between passing checks and human review.",
+        "Optional deeper exercise: choose Stacked PRs to review the prepared layers, their base branches, and the order in which they merge."
+      ],
+      "variants": [{"recipe": "delivery", "label": "Delivery basics"}, {"recipe": "delivery-stack", "label": "Stacked PRs"}],
+      "learn": "https://docs.github.com/en/get-started/using-github/github-flow"
+    }
+  ],
+  "recipes": {
+    "fusion": {"templates": ["fusion-routing"]},
+    "fusion-blank": {"templates": ["fusion-blank"]},
+    "sdk": {"local": true},
+    "soup": {"templates": ["tailspin-toys"]},
+    "dip": {"templates": ["octocart", "security-octo-supply-v4"]},
+    "dip-agent": {"templates": ["ai-security"]},
+    "delivery": {"templates": ["booth-bingo"], "deliveryBasics": true},
+    "delivery-stack": {"templates": ["booth-bingo"]}
+  }
+}
