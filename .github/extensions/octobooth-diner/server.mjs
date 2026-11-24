@@ -76,6 +76,8 @@ export async function startStation(dir, station, { adapter, polling = true } = {
                 return send(res, 200, {
                     dishes: catalog.dishes, event: settings?.event || "Welcome to Octobooth",
                     qrEnabled: settings?.qrEnabled ?? false, configured: Boolean(settings),
+                    environmentEnabled: Boolean(settings?.enabled && Date.now() <= Date.parse(settings.eventEnd)),
+                    sdkSource: readFileSync(join(root, "copilot-sdk/main.py"), "utf8"),
                     client: stationClient, order: publicOrder(order),
                 });
             }

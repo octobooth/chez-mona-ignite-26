@@ -4,7 +4,7 @@ const access = new URLSearchParams(location.hash.slice(1)).get("access") || sess
 if (access) sessionStorage.setItem("diner-access", access);
 if (location.hash) history.replaceState(null, "", "/");
 let client;
-const state = { dishes: [], path: "attendee", order: null, qrEnabled: false, stream: null, generation: 0, starting: false };
+const state = { dishes: [], path: "attendee", selection: null, order: null, environmentEnabled: false, sdkSource: "", qrEnabled: false, stream: null, generation: 0, starting: false };
 const escape = (text) => String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const notify = (message) => { element("notice").textContent = message; element("notice").hidden = !message; };
 async function api(path, body) {
@@ -26,14 +26,15 @@ function stopCamera() {
 }
 function setQr(enabled) {
     state.qrEnabled = enabled;
-    element("scan").hidden = !enabled || Boolean(state.order) || state.path === "staff";
+    element("scan").hidden = !enabled || Boolean(state.selection) || state.path === "staff";
     if (!enabled || element("scan").hidden) stopCamera();
 }
 function renderMenu() {
     element("attendee").setAttribute("aria-pressed", String(state.path === "attendee"));
     element("staff").setAttribute("aria-pressed", String(state.path === "staff"));
-    element("menu-section").hidden = Boolean(state.order);
-    element("order").hidden = !state.order;
+    element("menu-section").hidden = Boolean(state.selection);
+    element("order").hidden = !state.selection;
+    element("active-order").hidden = !state.order || Boolean(state.selection);
     setQr(state.qrEnabled);
     element("menu").innerHTML = state.dishes.map((dish, index) => `
         <article class="dish">
@@ -44,7 +45,7 @@ function renderMenu() {
           <button data-dish="${dish.id}">${state.path === "staff" ? "Lead this demo" : "Try this dish"} <span aria-hidden="true">↗</span></button>
         </article>`).join("");
     element("menu").querySelectorAll("[data-dish]").forEach((button) => {
-        button.addEventListener("click", () => startDish(button.dataset.dish));
+        button.addEventListener("click", () => openDish(button.dataset.dish));
     });
 }
 function safeLink(url, text) {
@@ -52,47 +53,103 @@ function safeLink(url, text) {
     if (parsed.protocol !== "https:" || !["github.com", "docs.github.com", "github.github.com"].includes(parsed.hostname) && !parsed.hostname.endsWith(".github.io")) throw new Error("Unexpected resource link.");
     return `<a href="${escape(url)}" target="_blank" rel="noopener noreferrer">${escape(text)}</a>`;
 }
-function renderOrder() {
-    const order = state.order;
-    const dish = state.dishes.find((item) => item.recipe === order.recipe || item.variants.some((v) => v.recipe === order.recipe));
-    if (!dish) throw new Error("Order does not match the catalog.");
-    state.path = order.path;
+function renderGuide() {
+    const dish = state.dishes.find((item) => item.id === state.selection?.dish);
+    if (!dish) throw new Error("Choose a dish from the menu.");
+    const order = state.order?.recipe === state.selection.recipe ? state.order : null;
     renderMenu();
     const steps = state.path === "staff" ? [...dish.attendee, ...dish.staff] : dish.attendee;
-    const links = order.resources.map((resource) => {
-        if (resource.kind === "local") return `<p>Your fresh starter: <code>${escape(resource.path)}</code>. Open this folder in VS Code.</p>`;
+    const links = (order?.resources || []).map((resource) => {
+        if (resource.kind === "local") return `<p>Your own starter folder: <code>${escape(resource.path)}</code></p>`;
         return safeLink(resource.url, resource.repo) +
             (resource.pagesUrl ? safeLink(resource.pagesUrl, "Open the deployed game") : "") +
             (resource.pulls || []).map((pr) => safeLink(pr.url, `Inspect PR #${pr.number}`)).join("");
     }).join("");
-    element("order").innerHTML = `<p class="eyebrow">YOUR ORDER</p><h2>${escape(dish.name)}</h2>
-        <div class="resources">${links}</div><ol>${steps.map((text) => `<li>${escape(text)}</li>`).join("")}</ol>
-        ${safeLink(dish.learn, "Keep exploring")}<br><button id="finish">Finish this order</button>
-        <p>Your work stays with this order. The next guest gets a fresh environment.</p>`;
-    element("finish").addEventListener("click", async () => {
-        element("finish").disabled = true;
+    const practice = dish.practice;
+    const variant = dish.variants.find((item) => item.recipe === state.selection.recipe);
+    element("order").innerHTML = `<button id="back-menu">Back to the menu</button>
+        <p class="eyebrow">${order ? "YOUR ORDER" : "LAB GUIDE"}</p><h2>${escape(dish.name)}</h2>
+        ${state.path === "staff" && variant ? `<p>Chef's variation: <strong>${escape(variant.label)}</strong></p>` : ""}
+        ${order ? `<div class="resources">${links}</div>` : `<p>Explore the instructions below. No environment is attached to this guide.</p>`}
+        ${practice ? `<section class="practice"><h3>Try it in Copilot</h3><p>${escape(practice.intro)}</p>
+            ${practice.prompts.map((prompt, index) => `<label for="prompt-${index}">${escape(prompt.label)}</label>
+                <textarea id="prompt-${index}" rows="6" readonly>${escape(prompt.text + (practice.includeSource ? `\n\nBundled main.py:\n\`\`\`python\n${state.sdkSource}\n\`\`\`` : ""))}</textarea>
+                <button data-copy="${index}">Copy prompt</button>`).join("")}
+            <p id="copy-status" role="status">Copy a prompt, paste it into Copilot, then send it. Copying does not run anything.</p></section>` : ""}
+        <h3>${dish.recipe === "sdk" ? "Starter walkthrough" : "With a prepared environment"}</h3>
+        <ol>${steps.map((text) => `<li>${escape(text)}</li>`).join("")}</ol>
+        ${dish.recipe === "sdk" ? `<details><summary>Read the bundled starter (read-only)</summary><pre><code>${escape(state.sdkSource)}</code></pre></details>` : ""}
+        <p>${safeLink(dish.learn, "Keep exploring")}</p>
+        <div class="guide-actions">
+          ${order ? '<button id="finish">Finish this order</button>' :
+            state.order ? '<p>Finish your open order before starting another environment.</p>' :
+            `<button id="use-environment" ${state.environmentEnabled ? "" : "disabled"}>Use a prepared environment</button>`}
+        </div>
+        ${!order && !state.order && !state.environmentEnabled ? "<p>Prepared environments need booth-host configuration. Reading the guide does not create any resources.</p>" : ""}
+        ${order ? "<p>Your work stays with this order. Finishing never hands it to another guest or deletes it automatically.</p>" : ""}`;
+    element("back-menu").addEventListener("click", () => {
+        if (state.starting) return;
+        state.selection = null;
+        notify("");
+        renderMenu();
+    });
+    element("use-environment")?.addEventListener("click", beginEnvironment);
+    element("order").querySelectorAll("[data-copy]").forEach((button) => {
+        button.addEventListener("click", () => copyPrompt(button.dataset.copy));
+    });
+    element("finish")?.addEventListener("click", async () => {
+        const button = element("finish");
+        button.disabled = true;
         try {
             await api("/api/finish", { id: order.id, client });
             state.order = null;
+            state.selection = null;
             notify("");
             renderMenu();
-        } catch (error) { notify(error.message); element("finish").disabled = false; }
+        } catch (error) { notify(error.message); button.disabled = false; }
     });
 }
-async function startDish(id) {
-    if (state.starting || state.order) return;
-    state.starting = true;
+async function copyPrompt(index) {
+    const prompt = element(`prompt-${index}`);
+    const status = element("copy-status");
+    try {
+        if (!navigator.clipboard?.writeText) throw new Error("Clipboard access is unavailable.");
+        await navigator.clipboard.writeText(prompt.value);
+        status.textContent = "Copied. Paste into the Copilot conversation beside the diner and send when ready.";
+    } catch (error) {
+        prompt.focus();
+        prompt.select();
+        status.textContent = `${error.message} The prompt is selected so you can copy it manually.`;
+    }
+}
+function openDish(id, recipe) {
+    if (state.starting) return;
+    const dish = state.dishes.find((item) => item.id === id);
+    if (!dish) throw new Error("Choose a dish from the menu.");
+    state.selection = { dish: id, recipe: recipe || element(`recipe-${id}`)?.value || dish.recipe };
     stopCamera();
     notify("");
-    element("menu").querySelectorAll("button").forEach((button) => { button.disabled = true; });
+    renderGuide();
+    element("order").scrollIntoView({ behavior: "smooth" });
+}
+function returnToOrder() {
+    if (!state.order) return;
+    const dish = state.dishes.find((item) => item.recipe === state.order.recipe || item.variants.some((variant) => variant.recipe === state.order.recipe));
+    if (!dish) throw new Error("Order does not match the catalog.");
+    state.path = state.order.path;
+    openDish(dish.id, state.order.recipe);
+}
+async function beginEnvironment() {
+    if (state.starting || state.order || !state.selection) return;
+    state.starting = true;
+    notify("");
+    element("order").querySelectorAll("button").forEach((button) => { button.disabled = true; });
     try {
-        state.order = await api("/api/start", { dish: id, path: state.path, recipe: element(`recipe-${id}`)?.value, client });
-        renderOrder();
-        element("order").scrollIntoView({ behavior: "smooth" });
+        state.order = await api("/api/start", { dish: state.selection.dish, path: state.path, recipe: state.selection.recipe, client });
     } catch (error) { notify(error.message); }
     finally {
         state.starting = false;
-        element("menu").querySelectorAll("button").forEach((button) => { button.disabled = false; });
+        renderGuide();
     }
 }
 // Existing Chez Mona tickets contain only the dish ID; use the bundled jsQR decoder.
@@ -101,7 +158,7 @@ function decodeTicket(raw) {
     return state.dishes.some((dish) => dish.id === id) ? id : null;
 }
 async function startCamera() {
-    if (!state.qrEnabled || state.order || state.path !== "attendee") return;
+    if (!state.qrEnabled || state.selection || state.path !== "attendee") return;
     stopCamera();
     const generation = state.generation;
     let stream;
@@ -125,7 +182,7 @@ async function startCamera() {
                 const result = jsQR(context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, { inversionAttempts: "attemptBoth" });
                 if (result?.data) {
                     const id = decodeTicket(result.data);
-                    if (id) { startDish(id); return; }
+                    if (id) { openDish(id); return; }
                     element("camera-notice").textContent = "That isn't a diner ticket. Try another ticket or select a dish below.";
                 }
             }
@@ -139,26 +196,34 @@ async function startCamera() {
     }
 }
 for (const path of ["attendee", "staff"]) element(path).addEventListener("click", () => {
+    if (state.starting) return;
     if (state.order) { notify("Finish your current order before changing experiences."); return; }
     state.path = path;
     notify("");
-    renderMenu();
+    if (state.selection) {
+        state.selection.recipe = state.dishes.find((dish) => dish.id === state.selection.dish).recipe;
+        renderGuide();
+    } else renderMenu();
 });
+element("return-to-order").addEventListener("click", returnToOrder);
 element("camera").addEventListener("click", startCamera);
 document.addEventListener("visibilitychange", () => { if (document.hidden) stopCamera(); });
 window.addEventListener("pagehide", stopCamera);
 async function refresh() {
     const data = await api("/api/menu");
-    const changed = !state.dishes.length || state.order?.id !== data.order?.id;
+    const first = !state.dishes.length;
+    const orderChanged = state.order?.id !== data.order?.id;
+    const availabilityChanged = state.environmentEnabled !== data.environmentEnabled;
     client = data.client;
     state.dishes = data.dishes;
     state.order = data.order;
+    state.environmentEnabled = Boolean(data.environmentEnabled);
+    state.sdkSource = data.sdkSource || "";
     element("event").textContent = data.event;
     setQr(data.qrEnabled);
-    if (changed) {
-        if (state.order) renderOrder();
-        else renderMenu();
-    }
+    if (orderChanged && state.order) returnToOrder();
+    else if (state.selection && (orderChanged || availabilityChanged)) renderGuide();
+    else if (first || orderChanged) renderMenu();
 }
 refresh().catch((error) => notify(error.message));
 setInterval(() => {

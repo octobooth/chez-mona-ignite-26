@@ -8,6 +8,14 @@ Use the Copilot app with this repository trusted and project extensions enabled.
 
 The worker requires Node.js 22.13 or newer with `node:sqlite`. Use a supported Node LTS release; the SDK itself is supplied by the app. No npm installation is required. The original [Chez Mona launcher](../../../launcher/) remains independent; machine setup, installed default launchers, QR printing, receipt printing, and fridge endpoints are not changed by this extension.
 
+## Explore and practice
+
+Selecting any dish opens its real instructions and learning links, even before a station is configured or while provisioning is paused. Staff variations use the same guides. Browsing and scanning tickets never allocate resources; **Use a prepared environment** is a separate action that remains gated by the station configuration and readiness checks. **Back to the menu** keeps an existing order intact, and **Return to your order** resumes it.
+
+Fusilli offers **Try it in Copilot** prompts for routing exploration and a bounded coding task. Select **Copy prompt**, paste into the Copilot conversation beside the diner, and send when ready. Clipboard denial selects the visible text for manual copying and reports the error. This works in the native canvas and an authorized browser preview, without an editor, dependency installation, environment allocation, or remote resource creation. Select Fusion in the app's model picker when available; using a different model does not demonstrate Fusion routing. Only actual app-provided routing information is evidence of which models handled a request.
+
+Fried Chicken displays the real bundled Python starter read-only and includes that source in its Copilot walkthrough prompt. A walkthrough does not execute an SDK agent or verify runtime behavior. Running the optional sample separately requires its [documented SDK prerequisites](../../../copilot-sdk/README.md) and may use Copilot credits. Installing dependencies and executing the sample are separate approvals, never side effects of browsing or copying a prompt. The canvas does not launch an external editor.
+
 ## Event and station configuration
 
 Staff use the native `configure_event` action. Supply the actual event end, account, owner, existing provisioner checkout, per-recipe reserve counts, resource budget, readiness deadline, and QR choice. Configuration is persisted and leaves provisioning paused. The separate `set_kitchen_enabled` action starts actual creation and must only be used after approval for those resources and costs. Pausing prevents new jobs; it does not cancel a running adapter.
@@ -36,7 +44,7 @@ Soup creates a Codespace in addition to the issue-to-PR setup. It requires `allo
 
 `set_qr_experience` persists the event's `enabled` choice without disturbing running orders. When enabled, attendees can select **Scan my ticket** or select the same five dishes directly. The scanner uses Chez Mona's existing bundled [jsQR decoder](../../../launcher/static/vendor/jsQR.js) and its existing ticket contract: the QR payload is the dish ID (`fusilli`, `fried-chicken`, `soup`, `dip`, or `sandwich`). Existing tickets for the first four dishes work unchanged; a Sandwich ticket must contain `sandwich`. The original fridge's four-dish ticket menu remains unchanged.
 
-When disabled, the scan entry is absent, any active camera stream is stopped, and direct selection never asks for camera permission. QR and direct entry call the same exclusive assignment operation. The setting does not disable receipt or ticket printing in the original launcher. No printer, camera, or fridge is required for the canvas.
+When disabled, the scan entry is absent, any active camera stream is stopped, and direct selection never asks for camera permission. QR and direct entry open the same guide; its environment action uses the same exclusive assignment operation. The setting does not disable receipt or ticket printing in the original launcher. No printer, camera, or fridge is required for the canvas.
 
 ## Provisioner integration
 

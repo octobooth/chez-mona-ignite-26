@@ -6,6 +6,13 @@
       "tag": "A little help from the whole kitchen",
       "description": "Explore model routing, then build something with agents.",
       "recipe": "fusion",
+      "practice": {
+        "intro": "Try these prompts in the Copilot conversation beside the diner. Select Copilot Fusion in the app's model picker if it is available; other models can do the exercise too, but that does not demonstrate Fusion routing. Use the app's routing information as evidence, not a model's guess. No repository or editor is needed.",
+        "prompts": [
+          {"label": "Explore routing", "text": "Explain Copilot Fusion's single, cascade, and critique patterns with a diner analogy. Compare an explanation task, a small code change, and a design task. Distinguish documented behavior from suggestions. Link official sources, and do not claim which models handled this request unless the app exposes that evidence. Stay in this conversation; do not modify files or create resources."},
+          {"label": "Build a small function", "text": "In this conversation, write a pure Python function normalize_ticket(text: str) -> str | None for our diner. Accept only fusilli, fried-chicken, soup, dip, and sandwich. Ignore letter case and outer whitespace; normalize runs of whitespace or underscores to one hyphen. Reject URLs and unknown dishes. Include focused unittest cases for those rules, including Fried_Chicken and a URL containing fusilli. Keep the code in chat: do not write files, install anything, run commands, or create remote resources. Explain how I can verify the answer; do not claim unrun tests passed."}
+        ]
+      },
       "attendee": [
         "Open your fresh repository in Copilot. Start a new chat and select Copilot Fusion.",
         "Ask: Explain single, cascade, and critique. When would each pattern help?",
@@ -24,10 +31,17 @@
       "tag": "Your app. Your tools. One helpful agent.",
       "description": "Give an agent application a custom tool of its own.",
       "recipe": "sdk",
+      "practice": {
+        "intro": "Inspect the real bundled starter below, then paste this source-grounded prompt into the Copilot conversation beside the diner. This is a code walkthrough, not a running SDK agent. No editor or dependency installation is needed; executing the optional SDK sample is a separate activity.",
+        "includeSource": true,
+        "prompts": [
+          {"label": "Walk through the SDK starter", "text": "Walk through the Python Copilot SDK starter included below. Explain define_tool, how create_session exposes the menu tool, and the difference between the application's tool and a chat prompt. Explain the permission implications of PermissionHandler.approve_all. Propose one small menu-tool improvement in chat without modifying files, installing dependencies, running code, or making an SDK request. Clearly distinguish what the source shows from behavior that would need execution to verify."}
+        ]
+      },
       "attendee": [
-        "Open your fresh starter in VS Code and inspect main.py.",
+        "Read the bundled main.py below. With a prepared environment, inspect your own starter copy too.",
         "Ask Copilot: What does define_tool do, and how does create_session make get_menu available to the agent?",
-        "Add one menu item or extend the tool. If the station has the documented SDK prerequisites, run uv run main.py and inspect the tool call."
+        "Propose one menu item or tool extension in Copilot. Running the optional sample separately requires the documented SDK prerequisites and approval; a code walkthrough is not an SDK execution."
       ],
       "staff": [
         "Trace the application, session, custom tool, and response. Distinguish application code from a prompt.",

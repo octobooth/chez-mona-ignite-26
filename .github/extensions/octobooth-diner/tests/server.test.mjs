@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { startStation } from "../server.mjs";
@@ -58,6 +58,43 @@ test("only one worker can own a station", async () => {
     const station = await startStation(dir, "test", { polling: false });
     try {
         await assert.rejects(startStation(dir, "test", { polling: false }), /already owns/);
+    } finally {
+        await station.close();
+        rmSync(dir, { recursive: true });
+    }
+});
+
+test("unconfigured guides expose the real SDK source without provisioning", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "diner-guides-"));
+    let creates = 0;
+    const adapter = { create: async () => { creates++; throw new Error("Unexpected provisioning"); } };
+    const station = await startStation(dir, "test", { adapter, polling: false });
+    const { origin, guestToken, staffToken } = station.endpoint;
+    const request = async (path, body, staff = false) => {
+        const response = await fetch(origin + path, {
+            method: body === undefined ? "GET" : "POST",
+            headers: { "Content-Type": "application/json", Origin: origin, Authorization: `Bearer ${staff ? staffToken : guestToken}` },
+            body: body === undefined ? undefined : JSON.stringify(body),
+        });
+        return { status: response.status, data: await response.json() };
+    };
+    try {
+        const menu = (await request("/api/menu")).data;
+        assert.equal(menu.environmentEnabled, false);
+        assert.equal(menu.sdkSource, readFileSync(new URL("../../../../copilot-sdk/main.py", import.meta.url), "utf8"));
+        assert.equal(menu.dishes.length, 5);
+        assert.equal(menu.order, null);
+        assert.deepEqual(station.store.list(), []);
+        assert.equal((await request("/api/start", { dish: "fried-chicken", path: "attendee" })).status, 400);
+        assert.equal(creates, 0);
+        const config = { event: "test", station: "test", eventEnd: new Date(Date.now() + 86400_000).toISOString(),
+            qrEnabled: false, maxResources: 4, reserve: { sdk: 1 }, readinessMinutes: 10 };
+        assert.equal((await request("/staff/configure", config, true)).status, 200);
+        assert.equal((await request("/api/menu")).data.environmentEnabled, false);
+        assert.equal((await request("/staff/power", { enabled: true }, true)).status, 200);
+        assert.equal((await request("/api/menu")).data.environmentEnabled, true);
+        assert.equal((await request("/staff/power", { enabled: false }, true)).status, 200);
+        assert.equal((await request("/api/menu")).data.environmentEnabled, false);
     } finally {
         await station.close();
         rmSync(dir, { recursive: true });
