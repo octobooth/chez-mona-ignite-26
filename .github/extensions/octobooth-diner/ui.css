@@ -29,14 +29,16 @@ h1 em { font-weight: 500; color: var(--red); }
 .section-title h2 { font: italic 700 27px Georgia, serif; margin: 15px 0; }
 .section-title span { font-size: 9px; letter-spacing: 2px; font-weight: 700; }
 #menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; }
-.dish { display: flex; flex-direction: column; align-items: flex-start; padding: 26px 0; border-bottom: 1px solid var(--line); position: relative; }
+.dish { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: subgrid; grid-row: span 6; justify-items: start; align-items: start; padding: 26px 0; border-bottom: 1px solid var(--line); position: relative; }
 .dish:last-child { grid-column: 1 / -1; }
 .dish .number { color: var(--red); font: italic 24px Georgia, serif; }
-.dish h3 { font: 700 25px/1.12 Georgia, serif; margin: 12px 0 9px; max-width: 360px; }
+.dish h3 { grid-row: 3; font: 700 25px/1.12 Georgia, serif; margin: 12px 0 9px; max-width: 360px; }
 .dish p { font-size: 13px; line-height: 1.65; margin: 8px 0; max-width: 390px; }
 .dish .tag { font-size: 10px; color: var(--red); font-weight: 700; letter-spacing: .5px; }
 .dish > p:last-of-type, .dish > label { margin-bottom: 20px; }
-.dish button { margin-top: auto; min-height: 44px; padding: 11px 18px; border: 1px solid var(--red); background: var(--red); color: var(--paper); font-size: 14px; font-weight: 750; }
+.dish h3 + p { grid-row: 4; }
+.dish > label { grid-row: 5; }
+.dish button { grid-row: 6; align-self: end; margin-top: auto; min-height: 44px; padding: 11px 18px; border: 1px solid var(--red); background: var(--red); color: var(--paper); font-size: 14px; font-weight: 750; }
 .dish button:hover { border-color: var(--ink); background: var(--ink); }
 .dish select { display: block; max-width: 100%; margin-top: 12px; background: var(--paper); border: 1px solid var(--line); padding: 8px; border-radius: 4px; font-size: 12px; }
 #scan, #order { margin: 10px 0 30px; border: 1px solid var(--line); background: #fffdf5; border-radius: 12px; padding: 26px; }
